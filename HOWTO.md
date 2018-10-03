@@ -1,4 +1,4 @@
-# React-Firebase login
+# How to use
 
 This is the next `react-code-splitting` version that is using `babel.config.js`.
 
