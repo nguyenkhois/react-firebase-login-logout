@@ -14,7 +14,10 @@ export class Login extends Component {
                 userId: ''
             },
             loginStatus: false,
-            message: ''
+            message: {
+                content: '',
+                style:''
+            }
         };
     }
 
@@ -47,10 +50,20 @@ export class Login extends Component {
                 // Handle login
                 firebase.auth().signInWithEmailAndPassword(email, password)
                     .then((userInfo) => {
-                        this.setState({ message: 'Login successfully! uid: ' + userInfo.user.uid });
+                        this.setState({
+                            message: {
+                                content: 'Login successfully!',
+                                style: 'message-success'
+                            }
+                        });
                     })
                     .catch((error) => {
-                        this.setState({ message: error.code + ': ' + error.message });
+                        this.setState({
+                            message: {
+                                content: error.code + ': ' + error.message,
+                                style: 'message-unsuccess'
+                            }
+                        });
                     });
                 // End of handling login
             })
@@ -72,7 +85,13 @@ export class Login extends Component {
         firebase.auth().signOut()
             .then(() => {
                 // Sign-out successful.
-                this.setState({ loginStatus: false });
+                this.setState({
+                    loginStatus: false,
+                    message: {
+                        content: 'You are logged out!',
+                        style: 'message-success'
+                    }
+                });
             })
             .catch((error) => {
                 // An error happened.
@@ -90,15 +109,15 @@ export class Login extends Component {
                 </p>
 
                 <form action="#">
-                    <label htmlFor="email">Email</label>
                     <input type="text" name="email"
+                        placeholder="@your-email-address"
                         onChange={e => this.handleInputChange(e)}
                     />
 
                     <br />
 
-                    <label htmlFor="password">Password</label>
-                    <input type="text" name="password"
+                    <input type="password" name="password"
+                        placeholder="password"
                         onChange={e => this.handleInputChange(e)}
                     />
 
@@ -111,13 +130,15 @@ export class Login extends Component {
                     </button>
                 </form>
 
-                <p>{this.state.message}</p>
+                <p className={this.state.message.style}>{this.state.message.content}</p>
             </div>
         );
 
         const userInfoPart = (
             <div>
-                <p>User information: {this.state.userInfo.userId}</p>
+                <h3>INFORMATION</h3>
+                <p className={this.state.message.style}>{this.state.message.content}</p>
+                <p>UserID: {this.state.userInfo.userId}</p>
                 <button type="button"
                     onClick={(e)=>this.handleLogout(e)}
                 >
@@ -126,6 +147,7 @@ export class Login extends Component {
             </div>
         );
 
+        // Main
         if (this.state.loginStatus) {
             return userInfoPart
         }
