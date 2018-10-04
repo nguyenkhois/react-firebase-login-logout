@@ -150,7 +150,7 @@ export class Login extends Component {
                     <br />
 
                     <input type="password" name="password"
-                    maxLength="30"
+                        maxLength="30"
                         placeholder="password"
                         onChange={(e) => this.handleInputChange(e)}
                     />
