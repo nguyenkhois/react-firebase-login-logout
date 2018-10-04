@@ -8,12 +8,12 @@ export class Login extends Component {
         this.state = {
             loginInfo: {
                 email: '',
-                password: ''
+                password: '',
+                loginStatus: false
             },
             userInfo: {
                 userId: ''
             },
-            loginStatus: false,
             message: {
                 content: '',
                 style:''
@@ -31,7 +31,7 @@ export class Login extends Component {
                 console.log('The user is logged in!');
                 this.handleSetState({
                     userInfo: { userId: user.uid },
-                    loginStatus: true,
+                    loginInfo: { loginStatus: true },
                     message: {
                         content: 'You are logged in!',
                         style: 'message-success'
@@ -97,7 +97,7 @@ export class Login extends Component {
             .then(() => {
                 // Sign-out successful.
                 this.handleSetState({
-                    loginStatus: false,
+                    loginInfo: { loginStatus: false },
                     message: {
                         content: 'You are logged out!',
                         style: 'message-success'
@@ -190,7 +190,7 @@ export class Login extends Component {
         );
 
         // Main part
-        if (this.state.loginStatus) {
+        if (this.state.loginInfo.loginStatus) {
             return userInfoPart
         }
         return loginFormPart
