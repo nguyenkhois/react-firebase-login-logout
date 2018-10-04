@@ -22,13 +22,20 @@ export class Login extends Component {
     }
 
     componentDidMount() {
+        this.mounted = true;
+        console.log('componentDidMount');
+
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 // User is signed in.
                 console.log('The user is logged in!');
-                this.setState({
+                this.handleSetState({
                     userInfo: { userId: user.uid },
-                    loginStatus: true
+                    loginStatus: true,
+                    message: {
+                        content: 'You are logged in!',
+                        style: 'message-success'
+                    }
                 });
             } else {
                 // No user is signed in.
@@ -37,7 +44,16 @@ export class Login extends Component {
         });
     }
 
-    handleLogin = (e) => {
+    componentWillUnmount() {
+        this.mounted = false;
+        console.log('componentWillUnmount');
+    }
+    
+    handleSetState = (payload) => {
+        this.mounted ? this.setState(payload) : null;
+    }
+    
+    handleSignInWithEmailPassword = (e) => {
         e.preventDefault();
 
         // Handle input data
@@ -50,15 +66,10 @@ export class Login extends Component {
                 // Handle login
                 firebase.auth().signInWithEmailAndPassword(email, password)
                     .then((userInfo) => {
-                        this.setState({
-                            message: {
-                                content: 'Login successfully!',
-                                style: 'message-success'
-                            }
-                        });
+                        console.log('The UserId:', userInfo.user.uid);
                     })
                     .catch((error) => {
-                        this.setState({
+                        this.handleSetState({
                             message: {
                                 content: error.code + ': ' + error.message,
                                 style: 'message-unsuccess'
@@ -77,15 +88,15 @@ export class Login extends Component {
         const name = target.name;
 
         const newState = { ...this.state.loginInfo, [name]: value };
-        this.setState({ loginInfo: newState });
+        this.handleSetState({ loginInfo: newState });
     }
 
-    handleLogout = (e) => {
+    handleSignOut = (e) => {
         e.preventDefault();
         firebase.auth().signOut()
             .then(() => {
                 // Sign-out successful.
-                this.setState({
+                this.handleSetState({
                     loginStatus: false,
                     message: {
                         content: 'You are logged out!',
@@ -99,6 +110,25 @@ export class Login extends Component {
             });
     }
 
+    handleSignInWithGoogle = (e) => {
+        e.preventDefault();
+
+        // The redirect method is preferred on mobile devices
+        const provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithRedirect(provider);
+
+        firebase.auth().getRedirectResult()
+            .then((result) => {
+                if (result.credential) {
+                    console.log('Access token:',result.credential.accessToken)
+                }
+                console.log(result.user);
+            })
+            .catch((error) => {
+                console.log('Error:', error);
+            });
+    }
+
     render() {
         const loginFormPart = (
             <div>
@@ -108,29 +138,41 @@ export class Login extends Component {
                     test@email.com (123456)
                 </p>
 
+                <p className={this.state.message.style}>{this.state.message.content}</p>
+
                 <form action="#">
                     <input type="text" name="email"
+                        maxLength="30"
                         placeholder="@your-email-address"
-                        onChange={e => this.handleInputChange(e)}
+                        onChange={(e) => this.handleInputChange(e)}
                     />
 
                     <br />
 
                     <input type="password" name="password"
+                    maxLength="30"
                         placeholder="password"
-                        onChange={e => this.handleInputChange(e)}
+                        onChange={(e) => this.handleInputChange(e)}
                     />
 
                     <br />
 
                     <button type="button"
-                        onClick={(e) => this.handleLogin(e)}
+                        onClick={(e) => this.handleSignInWithEmailPassword(e)}
                     >
-                        Login
+                        Sign in with email
+                    </button>
+
+                    <br/>
+
+                    <button type="button"
+                        onClick={(e) => this.handleSignInWithGoogle(e)}
+                    >
+                        <img src="./images/google-logo.png" alt=""/>
+                        Sign in with Google 
                     </button>
                 </form>
 
-                <p className={this.state.message.style}>{this.state.message.content}</p>
             </div>
         );
 
@@ -140,14 +182,14 @@ export class Login extends Component {
                 <p className={this.state.message.style}>{this.state.message.content}</p>
                 <p>UserID: {this.state.userInfo.userId}</p>
                 <button type="button"
-                    onClick={(e)=>this.handleLogout(e)}
+                    onClick={(e)=>this.handleSignOut(e)}
                 >
-                    Logout
+                    Sign out
                 </button>
             </div>
         );
 
-        // Main
+        // Main part
         if (this.state.loginStatus) {
             return userInfoPart
         }
